@@ -39,7 +39,7 @@ def save_yolo_label(label_path, bboxes):
             class_id, x, y, w, h = bbox
             file.write(f"{class_id} {x:.6f} {y:.6f} {w:.6f} {h:.6f}\n")
 
-def split_and_augment_data(src_dir, train_dir, valid_dir, split_ratio=0.8, img_size=(256, 416), num_augmentations=5):
+def split_and_augment_data(src_dir, train_dir, valid_dir, split_ratio=0.8, img_size=(256, 416), num_augmentations=6):
     os.makedirs(os.path.join(train_dir, 'images'), exist_ok=True)
     os.makedirs(os.path.join(train_dir, 'labels'), exist_ok=True)
     os.makedirs(os.path.join(valid_dir, 'images'), exist_ok=True)
@@ -48,11 +48,12 @@ def split_and_augment_data(src_dir, train_dir, valid_dir, split_ratio=0.8, img_s
     # Train과 Valid에 사용할 변환 설정
     train_transform = A.Compose([
         A.Resize(*img_size),
+        A.Rotate(limit=(-45, 45), p=0.5),
+        A.RandomScale(scale_limit=0.5, p=0.5) ,
         A.HorizontalFlip(p=0.5),
-        A.VerticalFlip(p=0.3),
+        A.VerticalFlip(p=0.4),
         A.RandomBrightnessContrast(p=0.3),
         A.Blur(blur_limit=3, p=0.1),
-        A.Rotate(limit=15, border_mode=cv2.BORDER_CONSTANT, value=0, p=0.4),
     ], bbox_params=A.BboxParams(format='yolo', label_fields=['class_labels']))
 
     valid_transform = A.Compose([A.Resize(*img_size)], bbox_params=A.BboxParams(format='yolo', label_fields=['class_labels']))
@@ -117,8 +118,8 @@ def split_and_augment_data(src_dir, train_dir, valid_dir, split_ratio=0.8, img_s
             save_yolo_label(dst_label, [[cls, *bbox] for cls, bbox in zip(transformed_class_labels, transformed_bboxes)])
 
 # 사용 예시
-src_dir = 'yolo_snack/src_data'
-train_dir = 'yolo_snack/trains'
-valid_dir = 'yolo_snack/valids'
+src_dir = 'yolo_snack_dataset/src_data'
+train_dir = 'yolo_snack_dataset/trains'
+valid_dir = 'yolo_snack_dataset/valids'
 compare_file_counts(src_dir)
 split_and_augment_data(src_dir, train_dir, valid_dir, split_ratio=0.8)
