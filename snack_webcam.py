@@ -4,30 +4,27 @@ import os
 import time
 
 def detect_snack_with_webcam():
-    # 학습한 모델 불러오기
-    model = YOLO('/Users/gusdnhh/Documents/yolo/snack_project/weights/best200.pt')  # best.pt 경로로 변경
+    model = YOLO('weights/best500_5(earlystop).pt') 
 
     # 웹캠 열기
-    cap = cv2.VideoCapture(0)  # 0은 기본 웹캠을 사용합니다
+    cap = cv2.VideoCapture(1)  
     if not cap.isOpened():
         print("웹캠을 열 수 없습니다.")
         return
 
     # 저장할 디렉토리 설정
     save_dir = 'testing_imgs'
-    os.makedirs(save_dir, exist_ok=True)  # 디렉토리가 없으면 생성
+    os.makedirs(save_dir, exist_ok=True) 
 
     while True:
-        # 웹캠에서 프레임 읽기
         ret, frame = cap.read()
         if not ret:
             print("프레임을 읽을 수 없습니다.")
             break
 
-        # 모델을 사용해 간식 탐지 수행
         results = model(frame)
 
-        # 감지된 객체에 바운딩 박스 그리기
+        # # 감지된 객체에 바운딩 박스 그리기
         for result in results:
             boxes = result.boxes
             for box in boxes:
